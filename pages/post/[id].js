@@ -133,7 +133,7 @@ export default SinglePost;
 
 export async function getServerSideProps(context) {
   const { id: indexName } = context.query;
-  const requestURL = `https://zcs651o3y8.execute-api.eu-central-1.amazonaws.com/dev/posts/${indexName}`;
+  const requestURL = ` https://py89pcivba.execute-api.eu-central-1.amazonaws.com/dev/posts/${indexName}`;
   const fetchedPost = await got.get(requestURL).json();
   return { props: { fetchedPost } };
 }

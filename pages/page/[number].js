@@ -167,7 +167,7 @@ export default Home;
 
 export async function getServerSideProps(context) {
   const { number: currentPageNumber, tag: currentTag } = context.query;
-  let requestURL = `https://zcs651o3y8.execute-api.eu-central-1.amazonaws.com/dev/posts?page=${currentPageNumber}`;
+  let requestURL = ` https://py89pcivba.execute-api.eu-central-1.amazonaws.com/dev/posts?page=${currentPageNumber}`;
   if (currentTag && currentTag !== 'All') {
     requestURL += `&tag=${currentTag};`;
   }
