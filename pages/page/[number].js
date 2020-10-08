@@ -1,14 +1,16 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components/macro';
-import got from 'got';
 import Link from 'next/link';
+import { fromUnixTime } from 'date-fns';
 import Navbar from '../../components/general/Navbar';
 import Post from '../../components/general/Post';
+import apolloClient from '../../lib/apolloClient';
 import { Container, InnerContainer } from '../../components/general/Containers';
 import { Heading2, Text } from '../../components/general/Headings';
 import { PrimaryButton, DestyledLink } from '../../components/general/Buttons';
 import { primaryColor, lightPrimaryColor } from '../../constants/websiteColors';
+import { GET_PAGE } from '../../apollo/requests';
 
 const MainHeading = styled(Heading2)`
   margin-bottom: 2rem;
@@ -70,7 +72,15 @@ const LoadMoreContainer = styled.div`
   }
 `;
 
-const Home = ({ fetchedPosts, currentTag, tags, currentPageNumber, allTags, setAllTags }) => {
+const Home = ({
+  fetchedPosts,
+  hasMore,
+  currentTag,
+  tags,
+  currentPageNumber,
+  allTags,
+  setAllTags,
+}) => {
   useEffect(() => {
     const checker = (arr, target) => target.every((v) => arr.includes(v));
     if (!checker(allTags, tags)) {
@@ -106,7 +116,7 @@ const Home = ({ fetchedPosts, currentTag, tags, currentPageNumber, allTags, setA
                   author={post.author}
                   description={post.description}
                   image={post.image}
-                  postedOn={new Date(post.postedOn)}
+                  postedOn={fromUnixTime(post.postedOn / 1000)}
                   tag={post.tag}
                   title={post.title}
                   indexName={post.indexName}
@@ -127,15 +137,17 @@ const Home = ({ fetchedPosts, currentTag, tags, currentPageNumber, allTags, setA
                 </Link>
               </PrimaryButton>
             )}
-            <PrimaryButton type="button">
-              <Link
-                href={`/page/${currentPageNumber + 1}${
-                  currentTag !== 'All' ? `?tag=${currentTag}` : ''
-                }`}
-              >
-                <DestyledLink>Next Page</DestyledLink>
-              </Link>
-            </PrimaryButton>
+            {hasMore && (
+              <PrimaryButton type="button">
+                <Link
+                  href={`/page/${currentPageNumber + 1}${
+                    currentTag !== 'All' ? `?tag=${currentTag}` : ''
+                  }`}
+                >
+                  <DestyledLink>Next Page</DestyledLink>
+                </Link>
+              </PrimaryButton>
+            )}
           </LoadMoreContainer>
         </>
       </InnerContainer>
@@ -156,6 +168,7 @@ Home.propTypes = {
       readingTime: PropTypes.number,
     }),
   ).isRequired,
+  hasMore: PropTypes.bool.isRequired,
   currentTag: PropTypes.string.isRequired,
   tags: PropTypes.arrayOf(PropTypes.string).isRequired,
   currentPageNumber: PropTypes.number.isRequired,
@@ -167,15 +180,19 @@ export default Home;
 
 export async function getServerSideProps(context) {
   const { number: currentPageNumber, tag: currentTag } = context.query;
-  let requestURL = ` https://py89pcivba.execute-api.eu-central-1.amazonaws.com/dev/posts?page=${currentPageNumber}`;
-  if (currentTag && currentTag !== 'All') {
-    requestURL += `&tag=${currentTag};`;
-  }
-  const fetchedPosts = await got.get(requestURL).json();
-  const tags = [...new Set(fetchedPosts.map((post) => post.tag))];
+  const { data } = await apolloClient.query({
+    query: GET_PAGE,
+    variables: {
+      pageNumber: +currentPageNumber,
+      pageSize: 28,
+      tag: currentTag !== 'All' ? currentTag : null,
+    },
+  });
+  const tags = [...new Set(data.posts.posts.map((post) => post.tag))];
   return {
     props: {
-      fetchedPosts,
+      hasMore: data.posts.hasMore,
+      fetchedPosts: data.posts.posts,
       currentTag: currentTag || 'All',
       currentPageNumber: +currentPageNumber,
       tags,

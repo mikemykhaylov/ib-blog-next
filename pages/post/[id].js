@@ -2,13 +2,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components/macro';
-import got from 'got';
-import { formatDistance } from 'date-fns';
+// import got from 'got';
+import { fromUnixTime, formatDistance } from 'date-fns';
 import Navbar from '../../components/general/Navbar';
 import Time from '../../components/icons/Time';
 import { Container, InnerContainer } from '../../components/general/Containers';
 import { Heading2, Heading5, Text } from '../../components/general/Headings';
 import { grayColor, primaryColor } from '../../constants/websiteColors';
+import apolloClient from '../../lib/apolloClient';
+import { GET_POST } from '../../apollo/requests';
 
 const PostInfo = styled.div`
   display: flex;
@@ -78,7 +80,8 @@ const PostImage = styled.img`
 
 const SinglePost = ({ fetchedPost }) => {
   const postDateFormatted =
-    !!fetchedPost.postedOn && `${formatDistance(new Date(), new Date(fetchedPost.postedOn))} ago`;
+    !!fetchedPost.postedOn &&
+    `${formatDistance(new Date(), fromUnixTime(fetchedPost.postedOn / 1000))} ago`;
   return (
     <Container>
       <InnerContainer>
@@ -133,7 +136,11 @@ export default SinglePost;
 
 export async function getServerSideProps(context) {
   const { id: indexName } = context.query;
-  const requestURL = ` https://py89pcivba.execute-api.eu-central-1.amazonaws.com/dev/posts/${indexName}`;
-  const fetchedPost = await got.get(requestURL).json();
-  return { props: { fetchedPost } };
+  const { data } = await apolloClient.query({
+    query: GET_POST,
+    variables: {
+      id: indexName,
+    },
+  });
+  return { props: { fetchedPost: data.post } };
 }
