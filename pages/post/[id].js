@@ -2,7 +2,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components/macro';
-// import got from 'got';
 import { fromUnixTime, formatDistance } from 'date-fns';
 import Navbar from '../../components/general/Navbar';
 import Time from '../../components/icons/Time';

@@ -196,6 +196,6 @@ export async function getServerSideProps(context) {
       currentTag: currentTag || 'All',
       currentPageNumber: +currentPageNumber,
       tags,
-    }, // will be passed to the page component as props
+    },
   };
 }
