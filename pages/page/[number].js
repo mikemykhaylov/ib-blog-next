@@ -99,11 +99,11 @@ const Home = ({
         </MainText>
         <TagContainer>
           {allTags.map((tag) => (
-            <TagFilter key={tag} active={tag === currentTag}>
-              <Link href={tag === 'All' ? '/page/1' : `/page/1?tag=${tag}`}>
-                <DestyledLink>{tag}</DestyledLink>
-              </Link>
-            </TagFilter>
+            <Link key={tag} href={tag === 'All' ? '/page/1' : `/page/1?tag=${tag}`}>
+              <DestyledLink>
+                <TagFilter active={tag === currentTag}>{tag}</TagFilter>
+              </DestyledLink>
+            </Link>
           ))}
         </TagContainer>
         <>
