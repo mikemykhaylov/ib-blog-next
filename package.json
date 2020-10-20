@@ -11,7 +11,7 @@
     "eslint": "eslint -c ./.eslintrc.yml \"./**/*.js?(x)\""
   },
   "dependencies": {
-    "@apollo/client": "^3.2.2",
+    "@apollo/client": "^3.2.5",
     "babel-plugin-macros": "^2.8.0",
     "babel-plugin-styled-components": "^1.11.1",
     "date-fns": "^2.16.1",
